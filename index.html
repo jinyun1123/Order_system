@@ -86,6 +86,12 @@
             transition: all 0.5s ease-out;
         }
 
+        /* 價格排序 */
+        .menu-sort{
+            text-align:center; 
+            margin-top:1rem;
+        }
+        
         /* 菜單 */
         .menu-grid {
             display: grid;
@@ -337,7 +343,7 @@
         .clearBtn {
             width: 20%;
             border-radius: 7px;
-            border:none;
+            border: none;
             background-color: #ddd;
             color: #8e4c0f;
             transition: transform 0.5s ease;
@@ -387,6 +393,10 @@
 
             .text p {
                 letter-spacing: 0.4rem;
+            }
+
+            .text h1 {
+                letter-spacing: 0.6rem;
             }
 
             .cart-sidebar {
@@ -460,7 +470,16 @@
             <button data-categories="cheeseCake" class="tag">起士蛋糕</button>
             <button data-categories="other" class="tag">其他</button>
             <button data-categories="drinks" class="tag">飲品</button>
+            <div class="menu-sort">
+                <select id="sort">
+                    <option value="">-- 價格排序 --</option>
+                    <option value="asc">價格：低 → 高</option>
+                    <option value="desc">價格：高 → 低</option>
+                </select>
+            </div>
         </div>
+        <!-- 價格排序 -->
+
 
         <!-- 菜單 -->
         <div class="menu-grid"></div>
@@ -602,6 +621,21 @@
             updateCartDisplay();
         })
 
+        const menuGrid = document.querySelector('.menu-grid');
+        const menuSort = document.querySelector('#sort');
+        // 價格排序功能
+        menuSort.addEventListener('change', (e) => {
+            const dir = e.target.value;
+            const cards = Array.from(menuGrid.children);
+
+            cards.sort((a, b) => {
+                const pa = Number(a.querySelector('.price').textContent.replace(/[^\d]/g,''));
+                const pb = Number(b.querySelector('.price').textContent.replace(/[^\d]/g,''));
+                return dir === 'asc' ? pa - pb : dir === 'desc' ? pb - pa : 0;
+            });
+            cards.forEach(card => menuGrid.appendChild(card))
+        });
+
         // 按鈕狀態
         const state = { filter: 'all' }
 
@@ -609,7 +643,6 @@
         const menuCategories = document.querySelector('.menu-categories');
 
         // 渲染菜單
-        const menuGrid = document.querySelector('.menu-grid');
         menu.forEach(item => {
             const menuItems = document.createElement('div');
             menuItems.classList.add('menu-items');
@@ -653,7 +686,7 @@
         };
 
         // 建立狀態
-        let cart = [];
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
         // 加入購物車
         function addToCart(itemId) {
@@ -698,6 +731,8 @@
             // 更新總價
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             totalPrice.textContent = total;
+            // 儲存物件轉文字資料
+            localStorage.setItem('cart', JSON.stringify(cart));
         };
 
         // 更新數量
@@ -736,6 +771,7 @@
                 alert('訂單已送出！感謝您的訂購。');
                 cart = [];
                 updateCartDisplay();
+                localStorage.setItem('cart', JSON.stringify(cart));
                 toggleCart();
             };
         };
@@ -753,6 +789,7 @@
                 alert('購物車已清空！');
                 cart = [];
                 updateCartDisplay();
+                localStorage.setItem('cart', JSON.stringify(cart));
             };
         };
 
